@@ -1,0 +1,246 @@
+@prefix sc:     <https://w3id.org/supplementcore#> .
+@prefix schema: <https://schema.org/> .
+@prefix dct:    <http://purl.org/dc/terms/> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# supplementCore ontology
+# OWL version of the supplementCore metadata schema
+# (https://publish.illinois.edu/dietarysupplements/), which drew
+# 12 properties from Schema.org and 6 from Dublin Core.
+#################################################################
+
+<https://w3id.org/supplementcore>
+    a owl:Ontology ;
+    dct:title "supplementCore: an ontology for dietary supplement product data"@en ;
+    dct:creator "Afnan Alasafra" ;
+    dct:description "Models dietary supplement products, their ingredients, dosing and safety information, aligned to Schema.org and Dublin Core, with a SKOS category taxonomy."@en ;
+    owl:versionInfo "1.0" .
+
+#################################################################
+# Classes
+#################################################################
+
+sc:Product a owl:Class ;
+    rdfs:label "Product"@en ;
+    owl:equivalentClass schema:Product .
+
+sc:DietarySupplement a owl:Class ;
+    rdfs:label "Dietary supplement"@en ;
+    rdfs:subClassOf sc:Product ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty sc:hasActiveIngredient ;
+                      owl:someValuesFrom sc:Ingredient ] ;
+    skos:closeMatch schema:DietarySupplement .
+
+sc:Ingredient a owl:Class ;
+    rdfs:label "Ingredient"@en .
+
+sc:Organization a owl:Class ;
+    rdfs:label "Organization"@en ;
+    owl:equivalentClass schema:Organization .
+
+sc:Brand a owl:Class ;
+    rdfs:label "Brand"@en ;
+    owl:equivalentClass schema:Brand .
+
+sc:Dose a owl:Class ;
+    rdfs:label "Dose"@en ;
+    rdfs:comment "An amount with a unit, e.g. 800 mcg."@en ;
+    rdfs:subClassOf schema:QuantitativeValue .
+
+sc:Population a owl:Class ;
+    rdfs:label "Target population"@en .
+
+sc:Category a owl:Class ;
+    rdfs:label "Supplement category"@en ;
+    rdfs:subClassOf skos:Concept .
+
+# Defined classes: membership is inferred by the reasoner, never asserted.
+sc:PregnancyCautionSupplement a owl:Class ;
+    rdfs:label "Supplement with pregnancy caution"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( sc:DietarySupplement
+                             [ a owl:Restriction ;
+                               owl:onProperty sc:notRecommendedFor ;
+                               owl:hasValue sc:pop-pregnant ] ) ] .
+
+sc:AdultOnlySupplement a owl:Class ;
+    rdfs:label "Adult-only supplement"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( sc:DietarySupplement
+                             [ a owl:Restriction ;
+                               owl:onProperty sc:hasAdultConsideration ;
+                               owl:hasValue true ] ) ] .
+
+#################################################################
+# Object properties
+#################################################################
+
+# Property hierarchy: active and inactive ingredients both inherit
+# from hasIngredient, so a query on hasIngredient finds both.
+sc:hasIngredient a owl:ObjectProperty ;
+    rdfs:label "has ingredient"@en ;
+    rdfs:domain sc:Product ;
+    rdfs:range sc:Ingredient ;
+    owl:inverseOf sc:ingredientOf .
+
+sc:ingredientOf a owl:ObjectProperty ;
+    rdfs:label "ingredient of"@en .
+
+sc:hasActiveIngredient a owl:ObjectProperty ;
+    rdfs:label "has active ingredient"@en ;
+    rdfs:subPropertyOf sc:hasIngredient ;
+    rdfs:domain sc:DietarySupplement ;
+    skos:closeMatch schema:activeIngredient .
+
+sc:hasInactiveIngredient a owl:ObjectProperty ;
+    rdfs:label "has inactive ingredient"@en ;
+    rdfs:subPropertyOf sc:hasIngredient .
+
+sc:manufacturer a owl:ObjectProperty ;
+    rdfs:label "manufacturer"@en ;
+    rdfs:range sc:Organization ;
+    owl:inverseOf sc:manufactures ;
+    owl:equivalentProperty schema:manufacturer .
+
+sc:manufactures a owl:ObjectProperty ;
+    rdfs:label "manufactures"@en .
+
+sc:distributor a owl:ObjectProperty ;
+    rdfs:label "distributor"@en ;
+    rdfs:range sc:Organization ;
+    rdfs:subPropertyOf dct:publisher .
+
+sc:brand a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "brand"@en ;
+    rdfs:range sc:Brand ;
+    owl:equivalentProperty schema:brand .
+
+sc:brandOwner a owl:ObjectProperty ;
+    rdfs:label "brand owner"@en ;
+    rdfs:domain sc:Brand ;
+    rdfs:range sc:Organization .
+
+sc:category a owl:ObjectProperty ;
+    rdfs:label "category"@en ;
+    rdfs:range sc:Category ;
+    skos:closeMatch schema:category .
+
+sc:targetPopulation a owl:ObjectProperty ;
+    rdfs:label "target population"@en ;
+    rdfs:range sc:Population ;
+    skos:closeMatch schema:targetPopulation .
+
+sc:notRecommendedFor a owl:ObjectProperty ;
+    rdfs:label "not recommended for"@en ;
+    rdfs:range sc:Population .
+
+sc:recommendedIntake a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "recommended intake"@en ;
+    rdfs:range sc:Dose ;
+    skos:closeMatch schema:recommendedIntake .
+
+sc:maximumIntake a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "maximum intake"@en ;
+    rdfs:range sc:Dose ;
+    skos:closeMatch schema:maximumIntake .
+
+#################################################################
+# Datatype properties
+#################################################################
+
+sc:title a owl:DatatypeProperty ;
+    rdfs:label "title"@en ;
+    rdfs:subPropertyOf dct:title , schema:name .
+
+sc:description a owl:DatatypeProperty ;
+    rdfs:label "description"@en ;
+    rdfs:subPropertyOf dct:description .
+
+sc:sku a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "SKU"@en ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf dct:identifier , schema:sku .
+
+sc:countryOfOrigin a owl:DatatypeProperty ;
+    rdfs:label "country of origin (ISO 3166-1 alpha-2)"@en ;
+    rdfs:range xsd:string .
+
+sc:safetyConsideration a owl:DatatypeProperty ;
+    rdfs:label "safety consideration"@en ;
+    rdfs:range rdf:langString ;
+    skos:closeMatch schema:safetyConsideration .
+
+sc:hasAdultConsideration a owl:DatatypeProperty ;
+    rdfs:label "has adult consideration"@en ;
+    rdfs:range xsd:boolean .
+
+sc:keyword a owl:DatatypeProperty ;
+    rdfs:label "keyword"@en ;
+    owl:equivalentProperty schema:keywords .
+
+sc:url a owl:DatatypeProperty ;
+    rdfs:label "url"@en ;
+    rdfs:range xsd:anyURI .
+
+sc:recordDate a owl:DatatypeProperty ;
+    rdfs:label "record date"@en ;
+    rdfs:range xsd:date ;
+    rdfs:subPropertyOf dct:date .
+
+sc:amount a owl:DatatypeProperty ;
+    rdfs:label "amount"@en ;
+    rdfs:domain sc:Dose ;
+    rdfs:range xsd:decimal .
+
+sc:unit a owl:DatatypeProperty ;
+    rdfs:label "unit"@en ;
+    rdfs:domain sc:Dose ;
+    rdfs:range xsd:string .
+
+sc:amountInMg a owl:DatatypeProperty ;
+    rdfs:label "amount in mg"@en ;
+    rdfs:comment "Normalized amount, so doses in g, mg and mcg can be compared."@en ;
+    rdfs:domain sc:Dose ;
+    rdfs:range xsd:decimal .
+
+#################################################################
+# Category taxonomy (SKOS)
+#################################################################
+
+sc:categories a skos:ConceptScheme ;
+    skos:prefLabel "Supplement categories"@en ;
+    skos:hasTopConcept sc:cat-vitamin , sc:cat-mineral , sc:cat-herbal .
+
+sc:cat-vitamin a sc:Category ; skos:inScheme sc:categories ;
+    skos:prefLabel "Vitamin"@en ; skos:topConceptOf sc:categories .
+sc:cat-b-vitamin a sc:Category ; skos:inScheme sc:categories ;
+    skos:prefLabel "B vitamin"@en ; skos:broader sc:cat-vitamin .
+sc:cat-fat-soluble-vitamin a sc:Category ; skos:inScheme sc:categories ;
+    skos:prefLabel "Fat-soluble vitamin"@en ; skos:altLabel "Vitamin A, D, E or K"@en ;
+    skos:broader sc:cat-vitamin .
+
+sc:cat-mineral a sc:Category ; skos:inScheme sc:categories ;
+    skos:prefLabel "Mineral"@en ; skos:topConceptOf sc:categories .
+sc:cat-trace-mineral a sc:Category ; skos:inScheme sc:categories ;
+    skos:prefLabel "Trace mineral"@en ; skos:broader sc:cat-mineral .
+
+sc:cat-herbal a sc:Category ; skos:inScheme sc:categories ;
+    skos:prefLabel "Herbal"@en ; skos:altLabel "Botanical"@en ;
+    skos:topConceptOf sc:categories .
+sc:cat-adaptogen a sc:Category ; skos:inScheme sc:categories ;
+    skos:prefLabel "Adaptogen"@en ; skos:broader sc:cat-herbal .
+
+#################################################################
+# Target populations (controlled list from the original schema)
+#################################################################
+
+sc:pop-adults   a sc:Population ; rdfs:label "Adults"@en .
+sc:pop-minors   a sc:Population ; rdfs:label "Minors"@en .
+sc:pop-infants  a sc:Population ; rdfs:label "Infants"@en .
+sc:pop-pregnant a sc:Population ; rdfs:label "Pregnant or lactating"@en .
