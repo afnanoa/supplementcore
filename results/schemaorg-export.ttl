@@ -1,0 +1,37 @@
+@prefix schema: <https://schema.org/> .
+
+<https://example.org/supplements/ASH-600> a schema:DietarySupplement ;
+    schema:activeIngredient "Ashwagandha root extract" ;
+    schema:brand "Example Labs" ;
+    schema:countryOfOrigin "IN" ;
+    schema:name "Ashwagandha Root Extract 600 mg" ;
+    schema:sku "ASH-600" .
+
+<https://example.org/supplements/B12-800> a schema:DietarySupplement ;
+    schema:activeIngredient "Methylcobalamin (vitamin B12)" ;
+    schema:brand "Example Labs" ;
+    schema:countryOfOrigin "US" ;
+    schema:name "Vitamin B12 800 mcg" ;
+    schema:sku "B12-800" .
+
+<https://example.org/supplements/D3-1000> a schema:DietarySupplement ;
+    schema:activeIngredient "Cholecalciferol (vitamin D3)" ;
+    schema:brand "Example Labs" ;
+    schema:countryOfOrigin "US" ;
+    schema:name "Vitamin D3 1,000 IU (25 mcg)" ;
+    schema:sku "D3-1000" .
+
+<https://example.org/supplements/LI-1> a schema:DietarySupplement ;
+    schema:activeIngredient "Lithium orotate" ;
+    schema:brand "Example Labs" ;
+    schema:countryOfOrigin "US" ;
+    schema:name "Lithium Orotate 1 mg" ;
+    schema:sku "LI-1" .
+
+<https://example.org/supplements/MG-200> a schema:DietarySupplement ;
+    schema:activeIngredient "Magnesium glycinate" ;
+    schema:brand "Example Labs" ;
+    schema:countryOfOrigin "CA" ;
+    schema:name "Magnesium Glycinate 200 mg" ;
+    schema:sku "MG-200" .
+
