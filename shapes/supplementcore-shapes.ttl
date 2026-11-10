@@ -1,0 +1,162 @@
+@prefix sc:     <https://w3id.org/supplementcore#> .
+@prefix scsh:   <https://w3id.org/supplementcore/shapes#> .
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+
+#################################################################
+# SHACL shapes for supplementCore
+# The OWL ontology says what things mean; these shapes say what a
+# complete, publishable product record must contain. Cardinalities
+# follow the original supplementCore data dictionary.
+#################################################################
+
+scsh: sh:declare [
+    sh:prefix "sc" ;
+    sh:namespace "https://w3id.org/supplementcore#"^^xsd:anyURI ] ,
+  [ sh:prefix "skos" ;
+    sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ] .
+
+scsh:DietarySupplementShape a sh:NodeShape ;
+    sh:targetClass sc:DietarySupplement ;
+    rdfs:label "Dietary supplement record"@en ;
+
+    sh:property [
+        sh:path sc:title ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "A product needs exactly one title." ] ;
+
+    sh:property [
+        sh:path sc:sku ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^[A-Z0-9-]{2,20}$" ;
+        sh:message "A product needs exactly one SKU of 2-20 upper-case letters, digits or hyphens." ] ;
+
+    sh:property [
+        sh:path sc:brand ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class sc:Brand ;
+        sh:message "A product needs exactly one brand." ] ;
+
+    sh:property [
+        sh:path sc:manufacturer ;
+        sh:minCount 1 ;
+        sh:class sc:Organization ;
+        sh:message "A product needs at least one manufacturer." ] ;
+
+    sh:property [
+        sh:path sc:hasActiveIngredient ;
+        sh:minCount 1 ;
+        sh:class sc:Ingredient ;
+        sh:message "A product needs at least one active ingredient." ] ;
+
+    sh:property [
+        sh:path sc:category ;
+        sh:minCount 1 ; sh:maxCount 3 ;
+        sh:class sc:Category ;
+        sh:message "A product needs 1-3 categories from the supplement category scheme." ] ;
+
+    sh:property [
+        sh:path sc:targetPopulation ;
+        sh:minCount 1 ; sh:maxCount 3 ;
+        sh:in ( sc:pop-adults sc:pop-minors sc:pop-infants ) ;
+        sh:message "Target population must be adults, minors or infants (1-3 values)." ] ;
+
+    sh:property [
+        sh:path sc:recommendedIntake ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:node scsh:DoseShape ;
+        sh:message "A product needs exactly one well-formed recommended intake." ] ;
+
+    sh:property [
+        sh:path sc:maximumIntake ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:node scsh:DoseShape ;
+        sh:message "A product needs exactly one well-formed maximum intake." ] ;
+
+    sh:property [
+        sh:path sc:safetyConsideration ;
+        sh:minCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:message "A product needs at least one language-tagged safety consideration." ] ;
+
+    sh:property [
+        sh:path sc:countryOfOrigin ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:pattern "^[A-Z]{2}$" ;
+        sh:message "Country of origin must be one two-letter ISO 3166-1 code, e.g. US." ] ;
+
+    sh:property [
+        sh:path sc:hasAdultConsideration ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:boolean ;
+        sh:message "hasAdultConsideration must be true or false." ] ;
+
+    sh:property [
+        sh:path sc:url ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:anyURI ] ;
+
+    sh:property [
+        sh:path sc:recordDate ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:message "A record needs one date in YYYY-MM-DD form." ] ;
+
+    # SHACL-SPARQL constraint: a rule plain SHACL cannot express.
+    # Converts both doses to mg and rejects records whose recommended
+    # intake is higher than the maximum intake.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Recommended intake ({?rec} mg) is higher than maximum intake ({?max} mg)." ;
+        sh:prefixes scsh: ;
+        sh:select """
+            SELECT $this ?rec ?max
+            WHERE {
+                $this sc:recommendedIntake ?r ; sc:maximumIntake ?m .
+                ?r sc:amount ?ra ; sc:unit ?ru .
+                ?m sc:amount ?ma ; sc:unit ?mu .
+                BIND (IF(?ru = "g", ?ra * 1000, IF(?ru = "mcg", ?ra / 1000, ?ra)) AS ?rec)
+                BIND (IF(?mu = "g", ?ma * 1000, IF(?mu = "mcg", ?ma / 1000, ?ma)) AS ?max)
+                FILTER (?rec > ?max)
+            }
+        """ ] ;
+
+    # A category must be a concept in the supplementCore scheme, not a free-text tag.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Category {?cat} is not in the supplementCore category scheme." ;
+        sh:prefixes scsh: ;
+        sh:select """
+            SELECT $this ?cat
+            WHERE {
+                $this sc:category ?cat .
+                FILTER NOT EXISTS { ?cat skos:inScheme sc:categories }
+            }
+        """ ] .
+
+scsh:DoseShape a sh:NodeShape ;
+    rdfs:label "Dose"@en ;
+    sh:property [
+        sh:path sc:amount ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minExclusive 0 ;
+        sh:message "A dose needs one positive decimal amount." ] ;
+    sh:property [
+        sh:path sc:unit ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:in ( "g" "mg" "mcg" ) ;
+        sh:message "Dose unit must be g, mg or mcg." ] .
+
+scsh:IngredientShape a sh:NodeShape ;
+    sh:targetClass sc:Ingredient ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:message "An ingredient needs a label." ] .
