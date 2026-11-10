@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Afnan Mathew · supplementCore ontology</title>
+<meta name="description" content="supplementCore: an OWL ontology, SHACL validation rules and SPARQL queries for dietary supplement product data, by Afnan Mathew.">
+<style>
+  :root { --ink:#1b1f24; --muted:#59636e; --accent:#1f4e79; --line:#e3e6ea; --soft:#f5f7f9; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color:var(--ink); line-height:1.6; }
+  main { max-width: 860px; margin: 0 auto; padding: 48px 24px 64px; }
+  a { color: var(--accent); }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 32px; }
+  .name { font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  h1 { font-size: 34px; line-height: 1.2; margin: 0 0 12px; }
+  .lead { font-size: 18px; color: var(--muted); margin: 0 0 16px; }
+  .links a { margin-right: 18px; font-weight: 600; text-decoration: none; }
+  h2 { font-size: 21px; margin: 40px 0 12px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 12px; margin: 16px 0; }
+  .card { background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; text-decoration:none; color:inherit; }
+  .card b { display:block; color: var(--accent); }
+  .card span { font-size: 14px; color: var(--muted); }
+  table { width:100%; border-collapse: collapse; font-size: 15px; margin: 12px 0; }
+  th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--soft); }
+  code { background: var(--soft); padding: 1px 5px; border-radius: 4px; font-size: 14px; }
+  pre { background: #0f1720; color:#e6edf3; padding: 16px; border-radius: 8px; overflow-x:auto; font-size: 13.5px; line-height:1.5; }
+  .tree { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; background: var(--soft); border:1px solid var(--line); border-radius:8px; padding: 14px 18px; white-space: pre; overflow-x:auto; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <p class="name">Afnan Mathew · Ontology, Taxonomy &amp; Metadata</p>
+  <h1>supplementCore: an ontology for dietary supplement product data</h1>
+  <p class="lead">An OWL ontology, SHACL validation rules and SPARQL queries that turn supplement product information into data people and machines can search, check and reason over.</p>
+  <div class="links">
+    <a href="README.md">Project write-up</a>
+    <a href="results/query-results.md">Query results</a>
+    <a href="https://www.linkedin.com/in/afnan-mathew">LinkedIn</a>
+  </div>
+</header>
+
+<h2>What's in the project</h2>
+<div class="grid">
+  <a class="card" href="ontology/supplementcore.ttl"><b>Ontology · OWL</b><span>Classes, properties, inverses, defined classes, Schema.org alignment</span></a>
+  <a class="card" href="shapes/supplementcore-shapes.ttl"><b>Validation · SHACL</b><span>Required fields, allowed values, and SPARQL-based rules</span></a>
+  <a class="card" href="README.md#queries"><b>Queries · SPARQL</b><span>Eight queries, from property paths to CONSTRUCT</span></a>
+  <a class="card" href="data/sample-products.ttl"><b>Data · RDF</b><span>Five sample products and two deliberately broken records</span></a>
+</div>
+
+<h2>Category taxonomy (SKOS)</h2>
+<p>Products are filed under their most specific category. Queries walk up the hierarchy, so a search for <em>Vitamin</em> also finds B-vitamin and fat-soluble-vitamin products.</p>
+<div class="tree">Supplement categories
+├── Vitamin
+│   ├── B vitamin
+│   └── Fat-soluble vitamin
+├── Mineral
+│   └── Trace mineral
+└── Herbal
+    └── Adaptogen</div>
+
+<h2>Modeling choices</h2>
+<table>
+  <tr><th>Feature</th><th>How it's used</th></tr>
+  <tr><td>Property inheritance</td><td><code>hasActiveIngredient</code> and <code>hasInactiveIngredient</code> are sub-properties of <code>hasIngredient</code>, so one query returns every ingredient.</td></tr>
+  <tr><td>Inverse properties</td><td>The data says which company makes a product; the reasoner adds what each company <code>manufactures</code>.</td></tr>
+  <tr><td>Defined classes</td><td><code>PregnancyCautionSupplement</code> and <code>AdultOnlySupplement</code> are never tagged by hand. The reasoner classifies products into them.</td></tr>
+  <tr><td>Structured doses</td><td>Each dose has an amount and a unit (g, mg, mcg), so rules and queries can convert and compare them.</td></tr>
+  <tr><td>Vocabulary alignment</td><td>Classes and properties map to Schema.org and Dublin Core, and query 8 exports products as Schema.org data.</td></tr>
+</table>
+
+<h2>Validation catches real errors</h2>
+<p>The sample products pass. Two broken records contain eight planted errors, and the SHACL rules catch all eight, including one plain SHACL can't express. This SPARQL-based rule converts both doses to mg and rejects a record whose recommended dose is above its maximum:</p>
+<pre>SELECT $this ?rec ?max
+WHERE {
+  $this sc:recommendedIntake ?r ; sc:maximumIntake ?m .
+  ?r sc:amount ?ra ; sc:unit ?ru .
+  ?m sc:amount ?ma ; sc:unit ?mu .
+  BIND (IF(?ru = "g", ?ra * 1000, IF(?ru = "mcg", ?ra / 1000, ?ra)) AS ?rec)
+  BIND (IF(?mu = "g", ?ma * 1000, IF(?mu = "mcg", ?ma / 1000, ?ma)) AS ?max)
+  FILTER (?rec &gt; ?max)
+}</pre>
+<p>Result: <em>"Recommended intake (2000.0 mg) is higher than maximum intake (500.0 mg)."</em> See the <a href="results/validation-invalid-products.txt">full validation report</a>.</p>
+
+<h2>Sample query: products the reasoner flagged</h2>
+<p>No product is labeled "pregnancy caution" in the data. The reasoner works it out from each product's <code>notRecommendedFor</code> value.</p>
+<table>
+  <tr><th>SKU</th><th>Product</th><th>Inferred class</th></tr>
+  <tr><td>ASH-600</td><td>Ashwagandha Root Extract 600 mg</td><td>Adult-only supplement</td></tr>
+  <tr><td>ASH-600</td><td>Ashwagandha Root Extract 600 mg</td><td>Supplement with pregnancy caution</td></tr>
+  <tr><td>LI-1</td><td>Lithium Orotate 1 mg</td><td>Adult-only supplement</td></tr>
+  <tr><td>LI-1</td><td>Lithium Orotate 1 mg</td><td>Supplement with pregnancy caution</td></tr>
+</table>
+<p><a href="results/query-results.md">See all eight query results →</a></p>
+
+<h2>Background</h2>
+<p>This builds on <a href="https://publish.illinois.edu/dietarysupplements/">supplementCore</a>, an 18-element XML metadata schema I co-designed for Metadata Theory and Practice at the University of Illinois Urbana-Champaign (MS in Library and Information Science, 2023). The original checked the format of individual XML records. This version models the same domain as linked data, so it can be reasoned over, validated across records and queried.</p>
+
+<footer>
+  Afnan Mathew · New York, NY · <a href="https://www.linkedin.com/in/afnan-mathew">LinkedIn</a><br>
+  Sample brands, doses and safety notes are fictional and for demonstration only, not health guidance.
+</footer>
+</main>
+</body>
+</html>
