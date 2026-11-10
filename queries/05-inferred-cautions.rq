@@ -1,0 +1,15 @@
+# Q5. Products the reasoner classified as needing a pregnancy caution
+# or as adult-only. No product is tagged with these classes directly.
+# Shows: OWL defined classes (equivalentClass + hasValue) and inference.
+PREFIX sc:   <https://w3id.org/supplementcore#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?sku ?title ?inferredClass
+WHERE {
+  VALUES ?class { sc:PregnancyCautionSupplement sc:AdultOnlySupplement }
+  ?product a ?class ;
+           sc:sku ?sku ;
+           sc:title ?title .
+  ?class rdfs:label ?inferredClass .
+}
+ORDER BY ?sku ?inferredClass

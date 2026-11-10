@@ -1,0 +1,22 @@
+# Q8. Rebuild each product as Schema.org data, ready for web markup.
+# Shows: CONSTRUCT, which outputs a new RDF graph instead of a table.
+PREFIX sc:     <https://w3id.org/supplementcore#>
+PREFIX schema: <https://schema.org/>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+  ?product a schema:DietarySupplement ;
+           schema:name ?title ;
+           schema:sku ?sku ;
+           schema:brand ?brandName ;
+           schema:activeIngredient ?ingredientName ;
+           schema:countryOfOrigin ?country .
+}
+WHERE {
+  ?product a sc:DietarySupplement ;
+           sc:title ?title ;
+           sc:sku ?sku ;
+           sc:brand/rdfs:label ?brandName ;
+           sc:hasActiveIngredient/rdfs:label ?ingredientName ;
+           sc:countryOfOrigin ?country .
+}

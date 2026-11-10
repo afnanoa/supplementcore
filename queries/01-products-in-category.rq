@@ -1,0 +1,16 @@
+# Q1. Every vitamin product, including products filed under narrower
+# categories (B vitamin, fat-soluble vitamin).
+# Shows: a SKOS taxonomy walked with the property path skos:broader*.
+PREFIX sc:   <https://w3id.org/supplementcore#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?sku ?title ?categoryLabel
+WHERE {
+  ?product a sc:DietarySupplement ;
+           sc:sku ?sku ;
+           sc:title ?title ;
+           sc:category ?category .
+  ?category skos:broader* sc:cat-vitamin ;
+            skos:prefLabel ?categoryLabel .
+}
+ORDER BY ?sku

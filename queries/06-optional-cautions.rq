@@ -1,0 +1,17 @@
+# Q6. All products, with any "not recommended for" population when
+# one exists.
+# Shows: OPTIONAL, so products without a caution still appear.
+PREFIX sc:   <https://w3id.org/supplementcore#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?sku ?title ?notRecommendedFor
+WHERE {
+  ?product a sc:DietarySupplement ;
+           sc:sku ?sku ;
+           sc:title ?title .
+  OPTIONAL {
+    ?product sc:notRecommendedFor ?pop .
+    ?pop rdfs:label ?notRecommendedFor .
+  }
+}
+ORDER BY ?sku

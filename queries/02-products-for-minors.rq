@@ -1,0 +1,15 @@
+# Q2. Products whose target population includes minors.
+# Shows: filtering on a controlled vocabulary.
+PREFIX sc:   <https://w3id.org/supplementcore#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?sku ?title (GROUP_CONCAT(?popLabel; separator=", ") AS ?populations)
+WHERE {
+  ?product sc:targetPopulation sc:pop-minors ;
+           sc:sku ?sku ;
+           sc:title ?title ;
+           sc:targetPopulation ?pop .
+  ?pop rdfs:label ?popLabel .
+}
+GROUP BY ?sku ?title
+ORDER BY ?sku

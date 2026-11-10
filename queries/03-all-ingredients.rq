@@ -1,0 +1,17 @@
+# Q3. Every ingredient of every product, active or inactive.
+# Shows: property inheritance. The data only uses hasActiveIngredient
+# and hasInactiveIngredient; after reasoning, both are also
+# hasIngredient, so one query finds them all.
+PREFIX sc:   <https://w3id.org/supplementcore#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?sku (COUNT(DISTINCT ?ingredient) AS ?ingredientCount)
+       (GROUP_CONCAT(DISTINCT ?label; separator="; ") AS ?ingredients)
+WHERE {
+  ?product a sc:DietarySupplement ;
+           sc:sku ?sku ;
+           sc:hasIngredient ?ingredient .
+  ?ingredient rdfs:label ?label .
+}
+GROUP BY ?sku
+ORDER BY ?sku

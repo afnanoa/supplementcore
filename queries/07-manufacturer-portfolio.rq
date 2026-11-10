@@ -1,0 +1,18 @@
+# Q7. What each manufacturer makes, counted by top-level category.
+# Shows: an inverse property (sc:manufactures is never written in the
+# data; the reasoner derives it from sc:manufacturer) plus aggregation.
+PREFIX sc:   <https://w3id.org/supplementcore#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?manufacturer ?topCategory (COUNT(DISTINCT ?product) AS ?products)
+WHERE {
+  ?org sc:manufactures ?product ;
+       rdfs:label ?manufacturer .
+  ?product sc:category ?cat .
+  ?cat skos:broader* ?top .
+  ?top skos:topConceptOf sc:categories ;
+       skos:prefLabel ?topCategory .
+}
+GROUP BY ?manufacturer ?topCategory
+ORDER BY ?manufacturer DESC(?products)
