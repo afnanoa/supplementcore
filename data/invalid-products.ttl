@@ -1,0 +1,50 @@
+@prefix sc:   <https://w3id.org/supplementcore#> .
+@prefix ex:   <https://example.org/supplements/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# Deliberately broken records. The SHACL shapes should reject
+# each of them, and validate.py shows the report.
+#################################################################
+
+ex:example-nutrition a sc:Organization ; rdfs:label "Example Nutrition Co." .
+ex:brand-example-labs a sc:Brand ; rdfs:label "Example Labs" .
+ex:ing-turmeric a sc:Ingredient ; rdfs:label "Turmeric root extract" .
+ex:ing-zinc a sc:Ingredient ; rdfs:label "Zinc picolinate" .
+
+# Problems: recommended dose (2 g) is above the maximum (500 mg);
+# no brand; category is not in the category scheme;
+# country written as "USA" instead of a two-letter code.
+ex:TUR-BAD a sc:DietarySupplement ;
+    sc:title "Turmeric Extract" ;
+    sc:sku "TUR-BAD" ;
+    sc:manufacturer ex:example-nutrition ;
+    sc:hasActiveIngredient ex:ing-turmeric ;
+    sc:category ex:superfood ;
+    sc:targetPopulation sc:pop-adults ;
+    sc:recommendedIntake [ a sc:Dose ; sc:amount 2.0 ; sc:unit "g" ] ;
+    sc:maximumIntake     [ a sc:Dose ; sc:amount 500.0 ; sc:unit "mg" ] ;
+    sc:safetyConsideration "Sample note."@en ;
+    sc:countryOfOrigin "USA" ;
+    sc:hasAdultConsideration false ;
+    sc:recordDate "2026-11-10"^^xsd:date .
+
+ex:superfood a sc:Category ; rdfs:label "Superfood" .
+
+# Problems: dose unit "IU" is not allowed; target population
+# "pregnant" is outside the allowed list; SKU has lower-case letters;
+# no record date.
+ex:zn-bad a sc:DietarySupplement ;
+    sc:title "Zinc 30" ;
+    sc:sku "zn-bad" ;
+    sc:brand ex:brand-example-labs ;
+    sc:manufacturer ex:example-nutrition ;
+    sc:hasActiveIngredient ex:ing-zinc ;
+    sc:category sc:cat-trace-mineral ;
+    sc:targetPopulation sc:pop-pregnant ;
+    sc:recommendedIntake [ a sc:Dose ; sc:amount 30.0 ; sc:unit "IU" ] ;
+    sc:maximumIntake     [ a sc:Dose ; sc:amount 40.0 ; sc:unit "mg" ] ;
+    sc:safetyConsideration "Sample note."@en ;
+    sc:countryOfOrigin "US" ;
+    sc:hasAdultConsideration false .

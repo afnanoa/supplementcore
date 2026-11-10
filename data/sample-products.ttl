@@ -1,0 +1,123 @@
+@prefix sc:   <https://w3id.org/supplementcore#> .
+@prefix ex:   <https://example.org/supplements/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+# Sample product records (illustrative)
+# "Example Labs" and "Example Nutrition Co." are fictional. Doses
+# and safety notes are sample values for demonstrating the model,
+# not health guidance.
+#################################################################
+
+# Organizations and brands --------------------------------------
+
+ex:example-nutrition a sc:Organization ;
+    rdfs:label "Example Nutrition Co." .
+
+ex:example-distribution a sc:Organization ;
+    rdfs:label "Example Distribution LLC" .
+
+ex:brand-example-labs a sc:Brand ;
+    rdfs:label "Example Labs" ;
+    sc:brandOwner ex:example-nutrition .
+
+# Ingredients ---------------------------------------------------
+
+ex:ing-methylcobalamin  a sc:Ingredient ; rdfs:label "Methylcobalamin (vitamin B12)" .
+ex:ing-lithium-orotate  a sc:Ingredient ; rdfs:label "Lithium orotate" .
+ex:ing-cholecalciferol  a sc:Ingredient ; rdfs:label "Cholecalciferol (vitamin D3)" .
+ex:ing-mag-glycinate    a sc:Ingredient ; rdfs:label "Magnesium glycinate" .
+ex:ing-ashwagandha-root a sc:Ingredient ; rdfs:label "Ashwagandha root extract" .
+ex:ing-cellulose        a sc:Ingredient ; rdfs:label "Hypromellose (vegetable capsule)" .
+ex:ing-sunflower-oil    a sc:Ingredient ; rdfs:label "Sunflower oil" .
+
+# Products ------------------------------------------------------
+
+ex:B12-800 a sc:DietarySupplement ;
+    sc:title "Vitamin B12 800 mcg" ;
+    sc:sku "B12-800" ;
+    sc:brand ex:brand-example-labs ;
+    sc:manufacturer ex:example-nutrition ;
+    sc:distributor ex:example-distribution ;
+    sc:hasActiveIngredient ex:ing-methylcobalamin ;
+    sc:hasInactiveIngredient ex:ing-cellulose ;
+    sc:category sc:cat-b-vitamin ;
+    sc:targetPopulation sc:pop-adults ;
+    sc:recommendedIntake [ a sc:Dose ; sc:amount 800.0 ; sc:unit "mcg" ] ;
+    sc:maximumIntake     [ a sc:Dose ; sc:amount 1600.0 ; sc:unit "mcg" ] ;
+    sc:safetyConsideration "Sample note: consult a healthcare provider if taking other medications."@en ;
+    sc:countryOfOrigin "US" ;
+    sc:hasAdultConsideration false ;
+    sc:keyword "vitamin b12" , "energy" , "methylcobalamin" ;
+    sc:recordDate "2026-11-10"^^xsd:date .
+
+ex:LI-1 a sc:DietarySupplement ;
+    sc:title "Lithium Orotate 1 mg" ;
+    sc:sku "LI-1" ;
+    sc:brand ex:brand-example-labs ;
+    sc:manufacturer ex:example-nutrition ;
+    sc:hasActiveIngredient ex:ing-lithium-orotate ;
+    sc:hasInactiveIngredient ex:ing-cellulose ;
+    sc:category sc:cat-trace-mineral ;
+    sc:targetPopulation sc:pop-adults ;
+    sc:notRecommendedFor sc:pop-pregnant ;
+    sc:recommendedIntake [ a sc:Dose ; sc:amount 1.0 ; sc:unit "mg" ] ;
+    sc:maximumIntake     [ a sc:Dose ; sc:amount 1.0 ; sc:unit "mg" ] ;
+    sc:safetyConsideration "Sample note: not for use during pregnancy or lactation."@en ;
+    sc:countryOfOrigin "US" ;
+    sc:hasAdultConsideration true ;
+    sc:keyword "lithium" , "trace mineral" ;
+    sc:recordDate "2026-11-10"^^xsd:date .
+
+ex:D3-1000 a sc:DietarySupplement ;
+    sc:title "Vitamin D3 1,000 IU (25 mcg)" ;
+    sc:sku "D3-1000" ;
+    sc:brand ex:brand-example-labs ;
+    sc:manufacturer ex:example-nutrition ;
+    sc:hasActiveIngredient ex:ing-cholecalciferol ;
+    sc:hasInactiveIngredient ex:ing-sunflower-oil ;
+    sc:category sc:cat-fat-soluble-vitamin ;
+    sc:targetPopulation sc:pop-adults , sc:pop-minors ;
+    sc:recommendedIntake [ a sc:Dose ; sc:amount 25.0 ; sc:unit "mcg" ] ;
+    sc:maximumIntake     [ a sc:Dose ; sc:amount 100.0 ; sc:unit "mcg" ] ;
+    sc:safetyConsideration "Sample note: fat-soluble; avoid exceeding the maximum intake."@en ;
+    sc:countryOfOrigin "US" ;
+    sc:hasAdultConsideration false ;
+    sc:keyword "vitamin d" , "bone health" ;
+    sc:recordDate "2026-11-10"^^xsd:date .
+
+ex:MG-200 a sc:DietarySupplement ;
+    sc:title "Magnesium Glycinate 200 mg" ;
+    sc:sku "MG-200" ;
+    sc:brand ex:brand-example-labs ;
+    sc:manufacturer ex:example-nutrition ;
+    sc:hasActiveIngredient ex:ing-mag-glycinate ;
+    sc:hasInactiveIngredient ex:ing-cellulose ;
+    sc:category sc:cat-mineral ;
+    sc:targetPopulation sc:pop-adults ;
+    sc:recommendedIntake [ a sc:Dose ; sc:amount 200.0 ; sc:unit "mg" ] ;
+    sc:maximumIntake     [ a sc:Dose ; sc:amount 350.0 ; sc:unit "mg" ] ;
+    sc:safetyConsideration "Sample note: may cause digestive upset above the maximum intake."@en ;
+    sc:countryOfOrigin "CA" ;
+    sc:hasAdultConsideration false ;
+    sc:keyword "magnesium" , "sleep" ;
+    sc:recordDate "2026-11-10"^^xsd:date .
+
+ex:ASH-600 a sc:DietarySupplement ;
+    sc:title "Ashwagandha Root Extract 600 mg" ;
+    sc:sku "ASH-600" ;
+    sc:brand ex:brand-example-labs ;
+    sc:manufacturer ex:example-nutrition ;
+    sc:hasActiveIngredient ex:ing-ashwagandha-root ;
+    sc:hasInactiveIngredient ex:ing-cellulose ;
+    sc:category sc:cat-adaptogen ;
+    sc:targetPopulation sc:pop-adults ;
+    sc:notRecommendedFor sc:pop-pregnant ;
+    sc:recommendedIntake [ a sc:Dose ; sc:amount 600.0 ; sc:unit "mg" ] ;
+    sc:maximumIntake     [ a sc:Dose ; sc:amount 1.0 ; sc:unit "g" ] ;
+    sc:safetyConsideration "Sample note: not for use during pregnancy."@en ;
+    sc:countryOfOrigin "IN" ;
+    sc:hasAdultConsideration true ;
+    sc:keyword "ashwagandha" , "stress" , "botanical" ;
+    sc:recordDate "2026-11-10"^^xsd:date .
