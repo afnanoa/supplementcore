@@ -1,0 +1,15 @@
+# Q4. Recommended vs. maximum intake, converted to mg, with the
+# headroom between them.
+# Shows: BIND, IF and arithmetic to normalize units in the query.
+PREFIX sc: <https://w3id.org/supplementcore#>
+
+SELECT ?sku ?recommendedMg ?maximumMg ?headroomRatio
+WHERE {
+  ?product sc:sku ?sku ;
+           sc:recommendedIntake [ sc:amount ?ra ; sc:unit ?ru ] ;
+           sc:maximumIntake     [ sc:amount ?ma ; sc:unit ?mu ] .
+  BIND (IF(?ru = "g", ?ra * 1000, IF(?ru = "mcg", ?ra / 1000, ?ra)) AS ?recommendedMg)
+  BIND (IF(?mu = "g", ?ma * 1000, IF(?mu = "mcg", ?ma / 1000, ?ma)) AS ?maximumMg)
+  BIND (ROUND(?maximumMg / ?recommendedMg * 100) / 100 AS ?headroomRatio)
+}
+ORDER BY ?headroomRatio
